@@ -96,13 +96,13 @@ server:
     log-replies: no
 
     # Do not print log lines that say why queries return SERVFAIL to clients
-    log-servfail: no
+    log-servfail: yes
 
     # Further limit logging
-    logfile: /dev/null
+    logfile: /dev/stderr
 
     # Only log errors
-    verbosity: 0
+    verbosity: 1
 
     ###########################################################################
     # PRIVACY SETTINGS
