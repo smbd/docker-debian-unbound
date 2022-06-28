@@ -98,14 +98,17 @@ server:
     # Do not print log lines that say why queries return SERVFAIL to clients
     log-servfail: yes
 
-    # Further limit logging
-    logfile: /dev/stderr
+    # log to STDERR
+    logfile: ""
 
     # log level
     verbosity: 1
 
     # logging DNSSEC fail
     val-log-level: 2
+
+    # use ascii timestamp
+    log-time-ascii: yes
 
     ###########################################################################
     # PRIVACY SETTINGS
