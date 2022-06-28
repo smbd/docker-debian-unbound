@@ -352,7 +352,9 @@ server:
 
 
 remote-control:
-    control-enable: no
+    control-enable: yes
+    control-use-cert: no
+    control-interface: /opt/unbound/etc/unbound/var/control.socket
 EOT
 fi
 
