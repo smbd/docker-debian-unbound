@@ -47,7 +47,7 @@ server:
     # original (larger) values. When the internal TTL expires, the cache item
     # has expired. Can be set lower to force the resolver to query for data
     # often, and not trust (very large) TTL values.
-    cache-max-ttl: 86400
+    cache-max-ttl: 3600
 
     # Time to live minimum for RRsets and messages in the cache. If the minimum
     # kicks in, the data is cached for longer than the domain owner intended,
@@ -55,7 +55,7 @@ server:
     # data in the cache is as the domain owner intended, higher values,
     # especially more than an hour or so, can lead to trouble as the data in
     # the cache does not match up with the actual data any more.
-    cache-min-ttl: 300
+    cache-min-ttl: 10
 
     # Set the working directory for the program.
     directory: "/opt/unbound/etc/unbound"
