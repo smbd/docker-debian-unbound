@@ -101,8 +101,11 @@ server:
     # Further limit logging
     logfile: /dev/stderr
 
-    # Only log errors
+    # log level
     verbosity: 1
+
+    # logging DNSSEC fail
+    val-log-level: 2
 
     ###########################################################################
     # PRIVACY SETTINGS
