@@ -108,6 +108,7 @@ RUN set -x && \
       bind9-dnsutils \
       bsdmainutils \
       ca-certificates \
+      vim-tiny \
       ldnsutils \
       libevent-2.1-7 \
       libnghttp2-14 \
