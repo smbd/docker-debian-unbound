@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DEBIAN_REL="bullseye"
-OPENSSL_VER="3.0.11"
+OPENSSL_VER="3.1.4"
 
 while getopts lo:p OPT ; do
   case ${OPT} in
