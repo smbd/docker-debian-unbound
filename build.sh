@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEBIAN_REL="bullseye"
+DEBIAN_REL="bookworm"
 OPENSSL_VER="3.1.4"
 
 while getopts lo:p OPT ; do
