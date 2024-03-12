@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DEBIAN_REL="bookworm"
-OPENSSL_VER="3.1.4"
+OPENSSL_VER="3.1.5"
 
 while getopts lo:p OPT ; do
   case ${OPT} in
