@@ -2,6 +2,7 @@
 
 DEBIAN_REL="bookworm"
 OPENSSL_VER="3.1.5"
+PLATFORM="linux/amd64,linux/arm64"
 
 while getopts lo:p OPT ; do
   case ${OPT} in
@@ -24,10 +25,10 @@ fi
 UNBOUND_VER="$1"
 
 if [ "${PUSH}" == "true" ] ; then
-  docker buildx build --push --platform linux/amd64,linux/arm64 -t smbd/unbound:${UNBOUND_VER} --build-arg DEBIAN_REL=${DEBIAN_REL} --build-arg OPENSSL_VER=${OPENSSL_VER} --build-arg UNBOUND_VER=${UNBOUND_VER} .
+  docker buildx build --push --platform ${PLATFORM} -t smbd/unbound:${UNBOUND_VER} --build-arg DEBIAN_REL=${DEBIAN_REL} --build-arg OPENSSL_VER=${OPENSSL_VER} --build-arg UNBOUND_VER=${UNBOUND_VER} .
 
   if [ "${LATEST}" == "true" ] ; then
-    docker buildx build --push --platform linux/amd64,linux/arm64 -t smbd/unbound:latest --build-arg DEBIAN_REL=${DEBIAN_REL} --build-arg OPENSSL_VER=${OPENSSL_VER} --build-arg UNBOUND_VER=${UNBOUND_VER} .
+    docker buildx build --push --platform ${PLATFORM} -t smbd/unbound:latest --build-arg DEBIAN_REL=${DEBIAN_REL} --build-arg OPENSSL_VER=${OPENSSL_VER} --build-arg UNBOUND_VER=${UNBOUND_VER} .
   fi
 else
   docker buildx build --progress=plain --load -t smbd/unbound:${UNBOUND_VER} --build-arg DEBIAN_REL=${DEBIAN_REL} --build-arg OPENSSL_VER=${OPENSSL_VER} --build-arg UNBOUND_VER=${UNBOUND_VER} .
