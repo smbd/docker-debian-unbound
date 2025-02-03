@@ -2,7 +2,7 @@
 
 ARG DEBIAN_REL
 
-FROM debian:${DEBIAN_REL} as builder
+FROM debian:${DEBIAN_REL:-bookworm} as builder
 
 ARG OPENSSL_VER
 ARG UNBOUND_VER
@@ -56,7 +56,7 @@ RUN set -x && \
       /opt/unbound/share \
       /opt/unbound/include 
 
-FROM debian:${DEBIAN_REL}-slim
+FROM debian:${DEBIAN_REL:-bookworm}-slim
 
 ARG UNBOUND_VER
 
