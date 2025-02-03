@@ -2,7 +2,7 @@
 
 ARG DEBIAN_REL
 
-FROM debian:${DEBIAN_REL:-bookworm} as builder
+FROM debian:${DEBIAN_REL:-bookworm} AS builder
 
 ARG OPENSSL_VER
 ARG UNBOUND_VER
@@ -94,7 +94,7 @@ RUN set -x && \
 
 WORKDIR /opt/unbound/
 
-ENV PATH /opt/unbound/sbin:"$PATH"
+ENV PATH=/opt/unbound/sbin:"$PATH"
 
 EXPOSE 53/tcp
 EXPOSE 53/udp
