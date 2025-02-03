@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DEBIAN_REL="bookworm"
-OPENSSL_VER="3.1.5"
+OPENSSL_VER="3.4.0"
 PLATFORM="linux/amd64,linux/arm64"
 
 while getopts lo:p OPT ; do
