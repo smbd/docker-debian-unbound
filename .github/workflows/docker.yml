@@ -86,7 +86,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ env.PLATFORM_PAIR }}
           no-cache: ${{ inputs.no-cache == true }}
           build-args: |
-            KNOT_VER=${{ env.TAG }}
+            UNBOUND_VER=${{ env.TAG }}
           context: .
 
       - name: export digest
