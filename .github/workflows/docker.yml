@@ -1,0 +1,147 @@
+name: docker image build and push to docker hub
+
+on:
+  push:
+    tags:
+      - '*'
+
+  workflow_dispatch:
+    inputs:
+      unbound-ver:
+        description: "unbound version"
+        required: true
+        type: string
+
+      no-cache:
+        description: "build images without cache"
+        default: false
+        required: false
+        type: boolean
+
+env:
+  IMAGE_NAME: unbound
+  AUTHOR: Mitsuru Shimamura <smbd.jp@gmail.com>
+
+jobs:
+  BuildDockerImage:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            platform: linux/amd64
+          - os: ubuntu-24.04-arm
+            platform: linux/arm64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: prepare
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: set tag
+        run: |
+          if (echo ${GITHUB_REF#refs/*/} | grep -q -P "^\d\." ) ; then echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV ; fi
+          if (echo ${{ inputs.unbound-ver }} | grep -q -P "^\d\." ) ; then echo "TAG=${{ inputs.unbound-ver }}" >> $GITHUB_ENV ; fi
+
+      - name: setup docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: extract docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+          tags: type=raw,value=${{ env.TAG }}
+          labels: |
+            org.opencontainers.image.author=${{ env.AUTHOR }}
+            org.opencontainers.image.description=latest unbound in Debian stable
+            org.opencontainers.image.licenses=MIT
+            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
+            org.opencontainers.image.url=docker.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+            org.opencontainers.image.version=${{ env.TAG }}
+
+      - name: login to ghcr
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GH_PAT }}
+
+      - name: build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          platforms: ${{ matrix.platform }}
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+          outputs: type=registry,push-by-digest=true,name-canonical=true
+          provenance: false
+          cache-from: type=gha,scope=${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=${{ env.PLATFORM_PAIR }}
+          no-cache: ${{ inputs.no-cache == true }}
+          build-args: |
+            KNOT_VER=${{ env.TAG }}
+          context: .
+
+      - name: export digest
+        run: |
+          mkdir -p /tmp/artifacts
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/artifacts/${digest#sha256:}"
+
+      - name: upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digest-${{ env.PLATFORM_PAIR }}
+          path: /tmp/artifacts/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge-and-push:
+    runs-on: ubuntu-latest
+    needs: BuildDockerImage
+    steps:
+      - name: set tag
+        run: |
+          if (echo ${GITHUB_REF#refs/*/} | grep -q -P "^\d\." ) ; then echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV ; fi
+          if (echo ${{ inputs.unbound-ver }} | grep -q -P "^\d\." ) ; then echo "TAG=${{ inputs.unbound-ver }}" >> $GITHUB_ENV ; fi
+          echo "GHCR_IMAGE_PATH=ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}" >> $GITHUB_ENV
+          echo "DOCKER_IMAGE_PATH=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}" >> $GITHUB_ENV
+
+      - name: download digest
+        uses: actions/download-artifact@v4
+        with:
+          pattern: digest-*
+          merge-multiple: true
+
+      - name: setup docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: login to docker hub
+        if: ${{ github.ref_type == 'tag' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: login to ghcr
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GH_PAT }}
+
+      - name: create ghcr manifest
+        run: docker buildx imagetools create -t ${{ env.GHCR_IMAGE_PATH }}:${{ env.TAG }} $(printf '${{ env.GHCR_IMAGE_PATH }}@sha256:%s ' *)
+
+      - name: create docker hub manifest
+        if: ${{ github.ref_type == 'tag' }}
+        run: |
+          docker buildx imagetools create -t ${{ env.DOCKER_IMAGE_PATH }}:${{ env.TAG }} $(printf '${{ env.GHCR_IMAGE_PATH }}@sha256:%s ' *)
+          docker buildx imagetools create -t ${{ env.DOCKER_IMAGE_PATH }}:latest $(printf '${{ env.GHCR_IMAGE_PATH }}@sha256:%s ' *)
