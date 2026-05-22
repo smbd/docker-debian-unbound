@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # original version: https://github.com/MatthewVance/unbound-docker
 
-ARG DEBIAN_REL=bookworm
+ARG DEBIAN_REL=trixie
 
 FROM debian:${DEBIAN_REL} AS builder
 
