@@ -6,8 +6,8 @@ ARG DEBIAN_REL=bookworm
 FROM debian:${DEBIAN_REL} AS builder
 
 ARG DEBIAN_REL
-ARG OPENSSL_VER=3.4.0
-ARG UNBOUND_VER=1.22.0
+ARG OPENSSL_VER=3.5.6
+ARG UNBOUND_VER=1.25.1
 
 ARG OPENSSL_DOWNLOAD_URL=https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz
 
