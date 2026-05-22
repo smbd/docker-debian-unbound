@@ -46,6 +46,8 @@ RUN curl -sSL ${UNBOUND_DOWNLOAD_URL} -o unbound.tar.gz && \
     useradd -g _unbound -s /etc -d /dev/null _unbound && \
     ./configure \
         --prefix=/opt/unbound \
+        --enable-pie \
+        --enable-relro-now \
         --with-username=_unbound \
         --with-ssl=/opt/openssl \
         --with-libevent \
